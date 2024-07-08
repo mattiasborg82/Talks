@@ -1,0 +1,13 @@
+//IPGEO, Private/PublicIP,IP from Command line, Regex
+union withsource=src DeviceProcessEvents, DeviceNetworkEvents
+//| extend IPfromCommandLine = extract(@"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",0,ProcessCommandLine)
+| extend IPfromCommandLine = extract(@"\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b",0,ProcessCommandLine)
+| extend IsPrivateIP = ipv4_is_private(IPfromCommandLine)
+| where IsPrivateIP == 0
+| where not(SuspiciousIPv4 has_any ("127.0.0","0.0.0.0"))
+| extend IPGEO = geo_info_from_ip_address(SuspiciousIPv4)
+| extend Type = iff(src=="DeviceProcessEvents","ProcessCommandLine","InboundConnection")
+| extend Country = IPGEO.country,
+         State = IPGEO.state,
+         City = IPGEO.city
+| project src,TimeGenerated,DeviceName,SuspiciousIPv4,Type

@@ -1,0 +1,7 @@
+//Demo externaldata function, sample reading montysecurity (https://github.com/montysecurity) c2 tracker file
+let CSC2 = externaldata(IPAddress: string)
+[ 
+   @'https://raw.githubusercontent.com/montysecurity/C2-Tracker/main/data/Cobalt%20Strike%20C2%20IPs.txt'
+];
+union DeviceNetworkEvents, DeviceProcessEvents
+| where RemoteIP has_any (CSC2) or ProcessCommandLine has_any (CSC2)

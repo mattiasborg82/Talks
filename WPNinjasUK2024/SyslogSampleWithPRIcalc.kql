@@ -1,0 +1,80 @@
+print SyslogMessage = "<13>Oct 22 12:34:56 myhostname myapp[1234]: This is a sample syslog message."
+| extend retval = extract_all(  
+                    @"<(?P<PRI>[\d]+)>(?P<Month>[^\s]+)\s(?P<Day>[^\s]+)\s(?P<Timestamp>[^\s]+)\s(?P<HostName>[^\s]+)\s(?P<ProcessName>[^\W]+)\[(?P<ProcessId>[\d]+)\]\:(?P<Message>[^$]+)",
+                                                                                        //Match& match after Number + Digit and Not digit until not Digit
+                    dynamic(["PRI","Month","Day","Timestamp","HostName","ProcessName","ProcessId","Message"]),
+                    tostring(SyslogMessage))[0] 
+| extend PRI = retval[0],
+         Date = strcat(retval[1]," ",retval[2]),
+         Timestamp = retval[3],
+         HostName = retval[4],
+         ProcessName = retval[5],
+         ProcessId = retval[6],
+         Message = retval[7]
+         |project-away retval
+  | extend FacilityCode = PRI / 8
+  | extend Facility = case
+                              (
+                                  FacilityCode == 0,"Ker",
+                                  FacilityCode == 1,"User",
+                                  FacilityCode == 2,"Mail",
+                                  FacilityCode == 3,"Daemon",
+                                  FacilityCode == 4,"Auth",
+                                  FacilityCode == 5,"Syslog",
+                                  FacilityCode == 6,"LPR",
+                                  FacilityCode == 7,"News",
+                                  FacilityCode == 8,"Uucp",
+                                  FacilityCode == 9,"Cron",
+                                  FacilityCode == 10,"AuthPriv",
+                                  FacilityCode == 11,"FTP",
+                                  FacilityCode == 12,"NTP",
+                                  FacilityCode == 13,"Security",
+                                  FacilityCode == 14,"Console",
+                                  FacilityCode == 15,"Solaris-Cron",
+                                  FacilityCode == 16,"Local0",
+                                  FacilityCode == 17,"Local1",
+                                  FacilityCode == 18,"Local2",
+                                  FacilityCode == 19,"Local3",
+                                  FacilityCode == 20,"Local4",
+                                  FacilityCode == 21,"Local5",
+                                  FacilityCode == 22,"Local6",
+                                  FacilityCode == 23,"Local7","N/A"
+                              )
+  | extend FacilityDescription = case
+                              (
+                                  FacilityCode == 0,"Kernel messages",
+                                  FacilityCode == 1,"User-level messages",
+                                  FacilityCode == 2,"Mail system",
+                                  FacilityCode == 3,"System daemons",
+                                  FacilityCode == 4,"Security/authentication messages",
+                                  FacilityCode == 5,"Messages generated internally by syslogd",
+                                  FacilityCode == 6,"Line printer subsystem",
+                                  FacilityCode == 7,"Network news subsystem",
+                                  FacilityCode == 8,"UUCP subsystem",
+                                  FacilityCode == 9,"Cron subsystem",
+                                  FacilityCode == 10,"Security/authentication messages",
+                                  FacilityCode == 11,"FTP daemon",
+                                  FacilityCode == 12,"NTP subsystem",
+                                  FacilityCode == 13,"Log audit",
+                                  FacilityCode == 14,"Log alert",
+                                  FacilityCode == 15,"Scheduling daemon",
+                                  FacilityCode == 16,"Local0",
+                                  FacilityCode == 17,"Local1",
+                                  FacilityCode == 18,"Local2",
+                                  FacilityCode == 19,"Local3",
+                                  FacilityCode == 20,"Local4",
+                                  FacilityCode == 21,"Local5",
+                                  FacilityCode == 22,"Local6",
+                                  FacilityCode == 23,"Local7","N/A"
+                              )
+  | extend SeverityValue = PRI - (FacilityCode * 8)
+  | extend Severity = case(
+                              SeverityValue == 0,"Emergency",
+                              SeverityValue == 1,"Alert",
+                              SeverityValue == 2,"Critical",
+                              SeverityValue == 3,"Error",
+                              SeverityValue == 4,"Warning",
+                              SeverityValue == 5,"Notice",
+                              SeverityValue == 6,"Informational",
+                              SeverityValue == 7,"Debug","N/A"
+                          )
