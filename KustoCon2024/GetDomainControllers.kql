@@ -1,0 +1,8 @@
+// Dynamically get all Domain Controllers
+// @mattiasborg82
+ExposureGraphNodes
+| extend _jsonBlob = (parse_json(NodeProperties)).rawData
+| extend _DeviceName = tolower((_jsonBlob.deviceName))
+| extend Roles = _jsonBlob.deviceRole
+| where Roles has "DomainController"
+| distinct _DeviceName

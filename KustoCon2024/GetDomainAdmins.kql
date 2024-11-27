@@ -1,0 +1,8 @@
+// Dynamically get all Domain Admins in the environment
+// @mattiasborg82
+ExposureGraphNodes
+| extend json = (parse_json(NodeProperties)).rawData
+| where json.nestedAdGroupNames has "Domain Admins"
+| where NodeLabel == "user"
+| mv-apply EntityIds on (summarize Identifiers = make_bag(pack(tostring(EntityIds.type), EntityIds.id)))
+| project accountName = json.accountName,Identifiers,accountEnabled=json.accountEnabled,distinguishedName=json.distinguishedName,adminCount=json.adminCount,AccountControl=json.userAccountControl
