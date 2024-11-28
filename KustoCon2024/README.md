@@ -4,6 +4,7 @@ KustoCon 2024
 
 - **Event Name**: KustoCon 2024
 - **Event Link**: [Event URL](https://kustocon.com/)
+- **View online recording**: [https://www.youtube.com/playlist?list=PL9sQKc0RBCiB73e4q-847W02Rzt3qPzbR](https://www.youtube.com/playlist?list=PL9sQKc0RBCiB73e4q-847W02Rzt3qPzbR)
 - **Session**: Threat Hunting with Kusto	
 - **Speakers**: Mattias Borg, Stefan Schörling
 - **Date**: November 8 2024
