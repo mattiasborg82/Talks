@@ -1,3 +1,5 @@
+//Can be added as functions in Defender XDR and called from other queries
+
 // Dynamically get all Domain Controllers
 // @mattiasborg82
 ExposureGraphNodes
@@ -6,3 +8,35 @@ ExposureGraphNodes
 | extend Roles = _jsonBlob.deviceRole
 | where Roles has "DomainController"
 | distinct _DeviceName
+
+//Output more data
+ExposureGraphNodes
+| extend _jsonBlob = (parse_json(NodeProperties)).rawData
+| extend DeviceName = tolower((_jsonBlob.deviceName)),
+         Roles = _jsonBlob.deviceRole,
+         OSVersionBuild = strcat(tostring(_jsonBlob.osVersionFriendlyName),"-",tostring(_jsonBlob.osReleaseId),"-",tostring(_jsonBlob.osBuild)),
+         OSVersion = tostring(_jsonBlob.osVersionFriendlyName),
+         ExposureScore = tostring(_jsonBlob.exposureScore),
+         SenseClientVersion = tostring(_jsonBlob.senseClientVersion),
+         isHybridAzureADJoined = _jsonBlob.isHybridAzureADJoined,
+         isAzureADJoined = _jsonBlob.isAzureADJoined,
+         SensorHealthState = tostring(_jsonBlob.sensorHealthState),
+         DeviceRiskScore = tostring(_jsonBlob.riskScore),
+         isInternetFacing = _jsonBlob.isInternetFacing,
+         RDPStatus = _jsonBlob.rdpStatus,
+         RemoteServices = _jsonBlob.remoteServicesInfo,
+         TPMInfo = _jsonBlob.tpmData,
+         VulnHasHighOrCritical = _jsonBlob.highRiskVulnerabilityInsights.hasHighOrCritical,
+         VulnMaxCvssScore = _jsonBlob.highRiskVulnerabilityInsights.maxCvssScore
+| extend RDPServiceStatus = RDPStatus.serviceRunning,
+         RDPAllowConnections = RDPStatus.allowConnections
+| where Roles has "DomainController"          
+| mv-apply EntityIds on (
+                            summarize Identifiers = make_bag(
+                                                            pack(
+                                                                    tostring(EntityIds.type), 
+                                                                    EntityIds.id
+                                                                )
+                                                        )
+                        )
+| project-away NodeId,NodeLabel,NodeName,NodeProperties,_jsonBlob, Categories, Roles,RDPStatus
