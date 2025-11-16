@@ -1,3 +1,22 @@
+// Defenderboys XOR Scalar Function
+// MattiasBorg
+let DB_XOR = (s:string, k:string) {
+    let key = toscalar(k);
+    let key_bytes = unicode_codepoints_from_string(key);
+    let xor_string = unicode_codepoints_from_string(s);
+    let xored_bytes = toscalar(
+    range i from 0 to array_length(xor_string) - 1 step 1
+    | extend cipher_byte = tolong(xor_string[i]),
+             key_byte = tolong(key_bytes[i % array_length(key_bytes)])
+    | extend plain_byte = binary_xor(cipher_byte, key_byte)
+    | summarize result = make_list(plain_byte)
+);
+    toscalar(unicode_codepoints_to_string(xored_bytes))
+};
+print ClearText = DB_XOR("051!/0! 2&}7 &","KUSTO")
+
+
+
 let IntToIPv4 = (ipint:long) {
     strcat(
         tostring((ipint / 16777216) % 256), ".",
