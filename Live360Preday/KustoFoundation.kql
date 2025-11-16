@@ -1,0 +1,86 @@
+// Select / Project columns
+MyTable
+| project ColumnA, ColumnB, Renamed = ColumnC
+
+// Filter rows
+MyTable
+| where Status == "Failed"
+| where Timestamp > ago(1d)
+
+// Sort
+MyTable
+| order by Timestamp desc
+
+// Limit / Take
+MyTable
+| take 50
+
+// Count rows
+MyTable
+| count
+
+// Summarize (aggregation)
+MyTable
+| summarize Total = count(), AvgValue = avg(Value) by Category
+
+// Distinct values
+MyTable
+| distinct UserId
+
+// Extend (create new columns)
+MyTable
+| extend SizeMB = SizeBytes / 1024 / 1024
+
+// Parse string values
+MyTable
+| parse LogEntry with "User=" User ", Action=" Action ", Status=" Status
+
+// Regex extract
+MyTable
+| extend User = extract(@"User=([^,]+)", 1, LogEntry)
+
+// Join two tables
+TableA
+| join kind=inner TableB on UserId
+
+// Union tables
+union TableA, TableB
+| where Timestamp > ago(7d)
+
+// Render charts
+MyTable
+| summarize Count = count() by bin(Timestamp, 1h)
+| render timechart
+
+// Binning for time aggregation
+MyTable
+| summarize Count = count() by bin(Timestamp, 15m)
+
+// Case / Switch logic
+MyTable
+| extend Severity = case(
+        ErrorCode == 0, "OK",
+        ErrorCode == 1, "Warning",
+        "Critical"
+    )
+
+// Search across tables
+search "failed login"
+
+// Let statements (variables / reusable blocks)
+let failed = MyTable | where Result == "Failed";
+failed | summarize count() by User
+
+// Top values
+MyTable
+| top 10 by SizeBytes desc
+
+// Make-series (for consistent time-series intervals)
+MyTable
+| make-series Count = count() on Timestamp from ago(7d) to now() step 1h
+
+// Basic security log example
+SigninLogs
+| where ResultType != 0
+| summarize Failures = count() by UserPrincipalName
+| order by Failures desc

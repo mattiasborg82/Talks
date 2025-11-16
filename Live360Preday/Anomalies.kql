@@ -1,0 +1,77 @@
+//Anomalies Example
+//Ingestion anomaly detection example for usage data
+let starttime = 90d; 
+let endtime = 0d; 
+let timeframe = 1d; 
+Usage 
+| where TimeGenerated between (startofday(ago(starttime)) .. startofday(ago(endtime))) 
+| where IsBillable == "true" 
+| make-series ActualUsage=sum(Quantity) default = 0 on TimeGenerated from startofday(ago(starttime)) to startofday(ago(endtime)) step timeframe by DataType
+| extend(Anomalies, AnomalyScore, ExpectedUsage) = series_decompose_anomalies(ActualUsage) 
+| mv-expand
+    ActualUsage to typeof(double),
+    TimeGenerated to typeof(datetime),
+    Anomalies to typeof(double),
+    AnomalyScore to typeof(double),
+    ExpectedUsage to typeof(long) 
+| where Anomalies != 0 
+| project TimeGenerated, ActualUsage, ExpectedUsage, AnomalyScore, Anomalies, DataType
+| sort by abs(AnomalyScore) desc 
+
+let starttime = 30d; 
+let endtime = 0d; 
+let timeframe = 1h; 
+EntraIdSignInEvents
+| where Timestamp  between (startofday(ago(starttime)) .. startofday(ago(endtime))) 
+| summarize LoginsPerHour=count() by AccountUpn, bin(Timestamp,1h) 
+| make-series AverageLogins=avg(LoginsPerHour) default = 0 on Timestamp from startofday(ago(starttime)) to startofday(ago(endtime)) step timeframe by AccountUpn
+| extend(Anomalies, AnomalyScore, ExpectedLogins) = series_decompose_anomalies(AverageLogins) 
+| mv-expand
+    AverageLogins to typeof(double),
+    Timestamp to typeof(datetime),
+    Anomalies to typeof(double),
+    AnomalyScore to typeof(double),
+    ExpectedLogins to typeof(long) 
+| where Anomalies != 0 
+| project Timestamp, AccountUpn, ExpectedLogins, AnomalyScore, Anomalies, AverageLogins
+| sort by abs(AnomalyScore) desc 
+
+
+
+
+let starttime = 30d; 
+let endtime = 0d; 
+let timeframe = 1h; 
+EntraIdSignInEvents
+| where Timestamp  between (startofday(ago(starttime)) .. startofday(ago(endtime))) 
+| summarize LoginsPerIPAddress=count() by IPAddress, bin(Timestamp,1h) 
+| make-series AverageLogins=avg(LoginsPerIPAddress) default = 0 on Timestamp from startofday(ago(starttime)) to startofday(ago(endtime)) step timeframe by IPAddress
+| extend(Anomalies, AnomalyScore, ExpectedLogins) = series_decompose_anomalies(AverageLogins) 
+| mv-expand
+    AverageLogins to typeof(double),
+    Timestamp to typeof(datetime),
+    Anomalies to typeof(double),
+    AnomalyScore to typeof(double),
+    ExpectedLogins to typeof(long) 
+| where Anomalies != 0 
+| project Timestamp, LoginsPerIPAddress, ExpectedLogins, AnomalyScore, Anomalies, IPAddress
+| sort by abs(AnomalyScore) desc
+
+
+let starttime = 30d; 
+let endtime = 0d; 
+let timeframe = 1h; 
+EntraIdSignInEvents
+| where Timestamp  between (startofday(ago(starttime)) .. startofday(ago(endtime))) 
+| summarize LoginsPerIPAddress=count() by IPAddress, bin(Timestamp,1h) 
+| make-series AverageLogins=avg(LoginsPerIPAddress) default = 0 on Timestamp from startofday(ago(starttime)) to startofday(ago(endtime)) step timeframe by IPAddress
+| extend(Anomalies, AnomalyScore, ExpectedLogins) = series_decompose_anomalies(AverageLogins) 
+| mv-expand
+    AverageLogins to typeof(double),
+    Timestamp to typeof(datetime),
+    Anomalies to typeof(double),
+    AnomalyScore to typeof(double),
+    ExpectedLogins to typeof(long) 
+| where Anomalies != 0 
+| project Timestamp, IPAddress, ExpectedLogins, AnomalyScore, Anomalies
+| sort by abs(AnomalyScore) desc
