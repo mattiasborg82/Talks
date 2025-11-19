@@ -1,10 +1,14 @@
 # EventName
-Live360 Hands-on Labs
+Live360
 ## Event Details
 
 - **Event Name**: Live360
 - **Event Link**: [Event URL](https://cyberlive360.com/ecg/live360events/events/orlando-2025/cyberlive.aspx)
-- **Session**: CRHOL01 Hands-On-Lab: Protect, Detect, Respond with Microsoft Defender XDR
+- **Session**: 
+CRT01 Improve Client Resilience with Defender Boys
+CRW06 Improve Your Resilience with Cybersecurity Table-top Exercises
+CRT09 Most Common Misconfigurations Identified During our Red Team Engagements
+
 - **Speakers**: Mattias Borg, Stefan Schörling
 - **Date**: November 16 2025
 - **Location**: Orlando, 2025
