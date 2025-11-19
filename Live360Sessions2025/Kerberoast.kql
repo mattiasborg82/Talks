@@ -1,6 +1,9 @@
 //Research query to identify potential Kerberoasting activity by correlating
 // Needs trim and maybe redue of querytypes
 // Loooking for Kerberos TGS event after identity queries for SPNs
+//
+// Mattias Borg - Live360 2025
+// DefenderBoys
 let Q1 = IdentityQueryEvents
 | where QueryType has_any ("AllAccounts", 
 "QueryUser",
